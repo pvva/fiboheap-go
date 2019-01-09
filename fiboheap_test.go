@@ -1,7 +1,7 @@
 package fiboheap
 
 import (
-	"container/heap"
+	goheap "container/heap"
 	"strconv"
 	"strings"
 	"testing"
@@ -364,23 +364,23 @@ func (h *IntHeap) Pop() interface{} {
 
 func BenchmarkIntHeapFill(b *testing.B) {
 	h := &IntHeap{}
-	heap.Init(h)
+	goheap.Init(h)
 
 	for i := 0; i < b.N; i++ {
-		heap.Push(h, i)
+		goheap.Push(h, i)
 	}
 }
 
 func BenchmarkIntHeapExtractMin(b *testing.B) {
 	h := &IntHeap{}
-	heap.Init(h)
+	goheap.Init(h)
 
 	for i := 0; i < b.N; i++ {
-		heap.Push(h, i)
+		goheap.Push(h, i)
 	}
 
 	for i := 0; i < b.N; i++ {
-		heap.Pop(h)
+		goheap.Pop(h)
 	}
 }
 
@@ -461,7 +461,7 @@ func BenchmarkMapHeapFill(b *testing.B) {
 	h := newMappedHeap()
 
 	for i := 0; i < b.N; i++ {
-		heap.Push(h, &mappedHeapNode{
+		h.Push(&mappedHeapNode{
 			name:        strconv.Itoa(i),
 			actualScore: i,
 		})
@@ -472,13 +472,13 @@ func BenchmarkMapHeapExtractMin(b *testing.B) {
 	h := newMappedHeap()
 
 	for i := 0; i < b.N; i++ {
-		heap.Push(h, &mappedHeapNode{
+		h.Push(&mappedHeapNode{
 			name:        strconv.Itoa(i),
 			actualScore: i,
 		})
 	}
 
 	for i := 0; i < b.N; i++ {
-		heap.Pop(h)
+		h.Pop()
 	}
 }

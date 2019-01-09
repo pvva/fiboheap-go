@@ -108,15 +108,15 @@ func (heap Heap) Min() (Orderable, bool) {
 	return heap.root.value, true
 }
 
-func (heap Heap) addToRoots(node *FHNode, roots map[int]*FHNode) {
+func (heap Heap) addToRoots(node *FHNode, roots *[64]*FHNode) {
 	node.prev = node
 	node.next = node
 	for {
-		eNode, ex := roots[node.degree]
-		if !ex {
+		eNode := roots[node.degree]
+		if eNode == nil {
 			break
 		}
-		delete(roots, node.degree)
+		roots[node.degree] = nil
 		if eNode.value.LessThen(node.value) {
 			node, eNode = eNode, node
 		}
@@ -141,42 +141,50 @@ func (heap *Heap) ExtractMin() (Orderable, bool) {
 	}
 
 	min := heap.root.value
-	roots := make(map[int]*FHNode)
+	roots := [64]*FHNode{}
 	for node := heap.root.next; node != heap.root; {
 		nextNode := node.next
-		heap.addToRoots(node, roots)
+		heap.addToRoots(node, &roots)
 		node = nextNode
 	}
 	if child := heap.root.child; child != nil {
 		child.parent = nil
 		node := child.next
-		heap.addToRoots(child, roots)
+		heap.addToRoots(child, &roots)
 
 		for node != child {
 			nextNode := node.next
 			node.parent = nil
-			heap.addToRoots(node, roots)
+			heap.addToRoots(node, &roots)
 			node = nextNode
 		}
 	}
-	if len(roots) == 0 {
+	var newRoot *FHNode
+	var degree int
+
+	for degree, newRoot = range roots {
+		if newRoot == nil {
+			continue
+		}
+
+		break
+	}
+
+	if newRoot == nil {
 		heap.root = nil
 
 		return min, true
 	}
 
-	var newRoot *FHNode
-	var degree int
-
-	for degree, newRoot = range roots {
-		break
-	}
-
-	delete(roots, degree)
+	roots[degree] = nil
 	newRoot.next = newRoot
 	newRoot.prev = newRoot
 
 	for _, node := range roots {
+		if node == nil {
+			continue
+		}
+
 		node.prev = newRoot
 		node.next = newRoot.next
 		newRoot.next.prev = node

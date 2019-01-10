@@ -7,16 +7,24 @@ This repository contains [Fibonacci heap](https://en.wikipedia.org/wiki/Fibonacc
 heap := fiboheap.NewHeap()
 ```
 
-Heap contains elements of type `fiboheap.Orderable`.
+Heap contains elements of type `fiboheap.Comparable`.
 
 ## Insertion of an element
 ```
-// orderable type definition
-type OrderableString string
+// comparable type definition
+type ComparableString string
 
-func (sv OrderableString) LessThen(i interface{}) bool {
-    if ts, ok := i.(OrderableString); ok {
+func (sv ComparableString) LessThen(i interface{}) bool {
+    if ts, ok := i.(ComparableString); ok {
         return strings.Compare(string(sv), string(ts)) < 0
+    }
+
+    return false
+}
+
+func (sv ComparableString) EqualsTo(i interface{}) bool {
+    if ts, ok := i.(ComparableString); ok {
+        return string(sv) == string(ts)
     }
 
     return false
@@ -24,9 +32,9 @@ func (sv OrderableString) LessThen(i interface{}) bool {
 
 ...
 
-node := heap.Insert(OrderableString("string"))
+node := heap.Insert(ComparableString("string"))
 ```
-Method `Insert` returns reference to `fiboheap.FHNode`, which contains corresponding `fiboheap.Orderable` value (via method `Value()`) and can be used for several other operations.
+Method `Insert` returns reference to `fiboheap.FHNode`, which contains corresponding `fiboheap.Comparable` value (via method `Value()`) and can be used for several other operations.
 
 ## Query for minimum element
 ```
@@ -48,13 +56,18 @@ heap.Union(otherHeap)
 
 ## Update value of an element
 ```
-success := heap.UpdateValue(node, newOrderableValue)
+success := heap.UpdateValue(node, newComparableValue)
 ```
 **Note**: update is possible only if new value is `LessThen` old value.
 
 ## Delete specified element
 ```
 heap.Delete(node)
+```
+
+## Find heap node by value
+```
+node := heap.Find(comparableValue)
 ```
 
 For more examples see tests.

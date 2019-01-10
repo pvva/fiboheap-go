@@ -1,11 +1,12 @@
 package fiboheap
 
-type Orderable interface {
+type Comparable interface {
 	LessThen(i interface{}) bool
+	EqualsTo(i interface{}) bool
 }
 
 type FHNode struct {
-	value  Orderable
+	value  Comparable
 	parent *FHNode
 	child  *FHNode
 	prev   *FHNode
@@ -14,7 +15,7 @@ type FHNode struct {
 	marked bool
 }
 
-func (fhn *FHNode) Value() Orderable {
+func (fhn *FHNode) Value() Comparable {
 	return fhn.value
 }
 
@@ -68,7 +69,7 @@ func (heap Heap) cutAndMeld(node *FHNode) {
 	heap.meld1(heap.root, node)
 }
 
-func (heap *Heap) Insert(v Orderable) *FHNode {
+func (heap *Heap) Insert(v Comparable) *FHNode {
 	newNode := &FHNode{
 		value: v,
 	}
@@ -100,7 +101,7 @@ func (heap *Heap) Union(targetHeap *Heap) {
 }
 
 // Query for minimum element
-func (heap Heap) Min() (Orderable, bool) {
+func (heap Heap) Min() (Comparable, bool) {
 	if heap.root == nil {
 		return nil, false
 	}
@@ -135,7 +136,7 @@ func (heap Heap) addToRoots(node *FHNode, roots *[64]*FHNode) {
 }
 
 // Get minimum element and remove it from heap
-func (heap *Heap) ExtractMin() (Orderable, bool) {
+func (heap *Heap) ExtractMin() (Comparable, bool) {
 	if heap.root == nil {
 		return nil, false
 	}
@@ -199,7 +200,7 @@ func (heap *Heap) ExtractMin() (Orderable, bool) {
 }
 
 // Updates node's value, if new value is greater then existing value - does nothing and returns false
-func (heap *Heap) UpdateValue(node *FHNode, newValue Orderable) bool {
+func (heap *Heap) UpdateValue(node *FHNode, newValue Comparable) bool {
 	if node.value.LessThen(newValue) {
 		return false
 	}
@@ -248,4 +249,33 @@ func (heap *Heap) Delete(node *FHNode) {
 	}
 
 	heap.meld2(heap.root, child)
+}
+
+func (heap *Heap) findAt(node *FHNode, value Comparable) *FHNode {
+	if node == nil {
+		return nil
+	}
+
+	n := node
+	for {
+		if n.value.EqualsTo(value) {
+			return n
+		}
+
+		r := heap.findAt(n.child, value)
+		if r != nil {
+			return r
+		}
+
+		n = n.next
+		if n == heap.root {
+			break
+		}
+	}
+
+	return nil
+}
+
+func (heap *Heap) Find(value Comparable) *FHNode {
+	return heap.findAt(heap.root, value)
 }

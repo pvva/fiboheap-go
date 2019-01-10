@@ -7,17 +7,25 @@ import (
 	"testing"
 )
 
-type OrderableString string
+type ComparableString string
 
-func (sv OrderableString) LessThen(i interface{}) bool {
-	if ts, ok := i.(OrderableString); ok {
+func (sv ComparableString) LessThen(i interface{}) bool {
+	if ts, ok := i.(ComparableString); ok {
 		return strings.Compare(string(sv), string(ts)) < 0
 	}
 
 	return false
 }
 
-func peekAndVerify(t *testing.T, heap *Heap, testValue Orderable) {
+func (sv ComparableString) EqualsTo(i interface{}) bool {
+	if ts, ok := i.(ComparableString); ok {
+		return string(sv) == string(ts)
+	}
+
+	return false
+}
+
+func peekAndVerify(t *testing.T, heap *Heap, testValue Comparable) {
 	str, ex := heap.Min()
 	if !ex {
 		t.Fatal("Heap creation is incorrect")
@@ -27,7 +35,7 @@ func peekAndVerify(t *testing.T, heap *Heap, testValue Orderable) {
 	}
 }
 
-func extractAndVerify(t *testing.T, heap *Heap, testValue Orderable) {
+func extractAndVerify(t *testing.T, heap *Heap, testValue Comparable) {
 	str, ex := heap.ExtractMin()
 	if !ex {
 		t.Fatal("Heap creation is incorrect")
@@ -49,14 +57,33 @@ func assertHeapIsEmpty(t *testing.T, heap *Heap) {
 	}
 }
 
+func assertFind(t *testing.T, heap *Heap, value Comparable) {
+	node := heap.Find(value)
+
+	if node == nil {
+		t.Fatal("Find is incorrect, returned empty value")
+	}
+	if !node.Value().EqualsTo(value) {
+		t.Fatal("Find is incorrect, returned incorrect value")
+	}
+}
+
+func assertNotFound(t *testing.T, heap *Heap, value Comparable) {
+	node := heap.Find(value)
+
+	if node != nil {
+		t.Fatal("Find is incorrect, returned non empty value")
+	}
+}
+
 func TestFiboHeapBasics(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
-	svC := OrderableString("C")
-	svD := OrderableString("D")
-	svE := OrderableString("E")
-	svF := OrderableString("F")
-	svG := OrderableString("G")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
+	svD := ComparableString("D")
+	svE := ComparableString("E")
+	svF := ComparableString("F")
+	svG := ComparableString("G")
 
 	heap := NewHeap()
 	heap.Insert(svC)
@@ -85,8 +112,8 @@ func TestFiboHeapBasics(t *testing.T) {
 }
 
 func TestFiboHeapDelete(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
 
 	heap := NewHeap()
 	nodeA := heap.Insert(svA)
@@ -104,8 +131,8 @@ func TestFiboHeapDelete(t *testing.T) {
 }
 
 func TestFiboHeapUnion1(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
 
 	heap1 := NewHeap()
 	heap1.Insert(svA)
@@ -124,9 +151,9 @@ func TestFiboHeapUnion1(t *testing.T) {
 }
 
 func TestFiboHeapUnion2(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
-	svC := OrderableString("C")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
 
 	heap1 := NewHeap()
 	heap1.Insert(svB)
@@ -147,8 +174,8 @@ func TestFiboHeapUnion2(t *testing.T) {
 }
 
 func TestFiboHeapUnion3(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
 
 	heap1 := NewHeap()
 
@@ -165,20 +192,20 @@ func TestFiboHeapUnion3(t *testing.T) {
 }
 
 func TestFiboHeapUpdateShouldNotExecute(t *testing.T) {
-	svA := OrderableString("A")
+	svA := ComparableString("A")
 
 	heap := NewHeap()
 	nodeA := heap.Insert(svA)
 
-	success := heap.UpdateValue(nodeA, OrderableString("B"))
+	success := heap.UpdateValue(nodeA, ComparableString("B"))
 	if success {
 		t.Fatal("Update operation is incorrect")
 	}
 }
 
 func TestFiboHeapUpdate1(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
 
 	heap := NewHeap()
 	heap.Insert(svA)
@@ -196,9 +223,9 @@ func TestFiboHeapUpdate1(t *testing.T) {
 }
 
 func TestFiboHeapUpdate2(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
-	svC := OrderableString("C")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
 
 	heap := NewHeap()
 	heap.Insert(svA)
@@ -216,9 +243,9 @@ func TestFiboHeapUpdate2(t *testing.T) {
 }
 
 func TestFiboHeapUpdate3(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
-	svC := OrderableString("C")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
 
 	heap := NewHeap()
 	heap.Insert(svB)
@@ -236,9 +263,9 @@ func TestFiboHeapUpdate3(t *testing.T) {
 }
 
 func TestFiboHeapUpdate4(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
-	svC := OrderableString("C")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
 
 	heap := NewHeap()
 	nodeB := heap.Insert(svB)
@@ -256,11 +283,11 @@ func TestFiboHeapUpdate4(t *testing.T) {
 }
 
 func TestFiboHeapUpdate5(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
-	svC := OrderableString("C")
-	svD := OrderableString("D")
-	svE := OrderableString("E")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
+	svD := ComparableString("D")
+	svE := ComparableString("E")
 
 	heap := NewHeap()
 	heap.Insert(svA)
@@ -289,9 +316,9 @@ func TestFiboHeapUpdate5(t *testing.T) {
 }
 
 func TestFiboHeapUpdate6(t *testing.T) {
-	svA := OrderableString("A")
-	svB := OrderableString("B")
-	svC := OrderableString("C")
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
 
 	heap1 := NewHeap()
 	heap1.Insert(svA)
@@ -332,6 +359,54 @@ func TestFiboHeapUpdate6(t *testing.T) {
 	extractAndVerify(t, heap1, svC)
 
 	assertHeapIsEmpty(t, heap1)
+}
+
+func TestFiboHeapFind1(t *testing.T) {
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
+	svD := ComparableString("D")
+	svE := ComparableString("E")
+
+	heap := NewHeap()
+	heap.Insert(svA)
+	heap.Insert(svB)
+	heap.Insert(svC)
+	heap.Insert(svD)
+	heap.Insert(svE)
+
+	assertFind(t, heap, ComparableString("C"))
+	assertFind(t, heap, ComparableString("B"))
+	assertFind(t, heap, ComparableString("A"))
+}
+
+func TestFiboHeapFind2(t *testing.T) {
+	svA := ComparableString("A")
+	svB := ComparableString("B")
+	svC := ComparableString("C")
+
+	heap := NewHeap()
+	nodeA := heap.Insert(svA)
+	heap.Insert(svA)
+	heap.Insert(svB)
+	nodeC := heap.Insert(svC)
+
+	assertFind(t, heap, ComparableString("C"))
+	assertFind(t, heap, ComparableString("B"))
+	assertFind(t, heap, ComparableString("A"))
+
+	heap.Delete(nodeC)
+	assertNotFound(t, heap, svC)
+
+	heap.Delete(nodeA)
+	assertFind(t, heap, svA)
+	extractAndVerify(t, heap, svA)
+	assertNotFound(t, heap, svA)
+
+	assertFind(t, heap, svB)
+	extractAndVerify(t, heap, svB)
+
+	assertHeapIsEmpty(t, heap)
 }
 
 // benchmark
@@ -384,11 +459,19 @@ func BenchmarkIntHeapExtractMin(b *testing.B) {
 	}
 }
 
-type OrderableInt int
+type ComparableInt int
 
-func (si OrderableInt) LessThen(i interface{}) bool {
-	if ts, ok := i.(OrderableInt); ok {
+func (si ComparableInt) LessThen(i interface{}) bool {
+	if ts, ok := i.(ComparableInt); ok {
 		return int(si) < int(ts)
+	}
+
+	return false
+}
+
+func (si ComparableInt) EqualsTo(i interface{}) bool {
+	if ts, ok := i.(ComparableInt); ok {
+		return int(si) == int(ts)
 	}
 
 	return false
@@ -398,7 +481,7 @@ func BenchmarkFiboHeapFill(b *testing.B) {
 	h := NewHeap()
 
 	for i := 0; i < b.N; i++ {
-		h.Insert(OrderableInt(i))
+		h.Insert(ComparableInt(i))
 	}
 }
 
@@ -406,11 +489,23 @@ func BenchmarkFiboHeapExtractMin(b *testing.B) {
 	h := NewHeap()
 
 	for i := 0; i < b.N; i++ {
-		h.Insert(OrderableInt(i))
+		h.Insert(ComparableInt(i))
 	}
 
 	for i := 0; i < b.N; i++ {
 		h.ExtractMin()
+	}
+}
+
+func BenchmarkFiboHeapFind(b *testing.B) {
+	h := NewHeap()
+
+	for i := 0; i < b.N; i++ {
+		h.Insert(ComparableInt(i))
+	}
+
+	for i := 0; i < b.N; i++ {
+		h.Find(ComparableInt(i))
 	}
 }
 
@@ -457,6 +552,14 @@ func (q *MappedHeap) Pop() interface{} {
 	return node
 }
 
+func (q *MappedHeap) Find(name string) *mappedHeapNode {
+	if i, ex := q.indexOf[name]; ex {
+		return q.nodes[i]
+	}
+
+	return nil
+}
+
 func BenchmarkMapHeapFill(b *testing.B) {
 	h := newMappedHeap()
 
@@ -483,18 +586,33 @@ func BenchmarkMapHeapExtractMin(b *testing.B) {
 	}
 }
 
+func BenchmarkMapHeapFind(b *testing.B) {
+	h := newMappedHeap()
+
+	for i := 0; i < b.N; i++ {
+		h.Push(&mappedHeapNode{
+			name:        strconv.Itoa(i),
+			actualScore: i,
+		})
+	}
+
+	for i := 0; i < b.N; i++ {
+		h.Find(strconv.Itoa(i))
+	}
+}
+
 // large heaps correctness
 
 func TestLargeHeap1(t *testing.T) {
 	h := NewHeap()
 
 	for i := 0; i < 1e7; i++ {
-		h.Insert(OrderableInt(i % 10))
+		h.Insert(ComparableInt(i % 10))
 	}
 
 	for i := 0; i < 10; i++ {
 		for j := 0; j < 1e6; j++ {
-			extractAndVerify(t, h, OrderableInt(i))
+			extractAndVerify(t, h, ComparableInt(i))
 		}
 	}
 }
@@ -503,10 +621,22 @@ func TestLargeHeap2(t *testing.T) {
 	h := NewHeap()
 
 	for i := 0; i < 1e7; i++ {
-		h.Insert(OrderableInt(i))
+		h.Insert(ComparableInt(i))
 	}
 
 	for i := 0; i < 1e7; i++ {
-		extractAndVerify(t, h, OrderableInt(i))
+		extractAndVerify(t, h, ComparableInt(i))
+	}
+}
+
+func TestFiboHeapLargeFind(t *testing.T) {
+	h := NewHeap()
+
+	for i := 0; i < 5e4; i++ {
+		h.Insert(ComparableInt(i))
+	}
+
+	for i := 0; i < 5e4; i++ {
+		assertFind(t, h, ComparableInt(i))
 	}
 }

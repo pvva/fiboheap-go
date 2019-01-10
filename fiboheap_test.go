@@ -17,7 +17,7 @@ func (sv OrderableString) LessThen(i interface{}) bool {
 	return false
 }
 
-func peekAndVerify(t *testing.T, heap *Heap, testValue OrderableString) {
+func peekAndVerify(t *testing.T, heap *Heap, testValue Orderable) {
 	str, ex := heap.Min()
 	if !ex {
 		t.Fatal("Heap creation is incorrect")
@@ -27,7 +27,7 @@ func peekAndVerify(t *testing.T, heap *Heap, testValue OrderableString) {
 	}
 }
 
-func extractAndVerify(t *testing.T, heap *Heap, testValue OrderableString) {
+func extractAndVerify(t *testing.T, heap *Heap, testValue Orderable) {
 	str, ex := heap.ExtractMin()
 	if !ex {
 		t.Fatal("Heap creation is incorrect")
@@ -480,5 +480,33 @@ func BenchmarkMapHeapExtractMin(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		h.Pop()
+	}
+}
+
+// large heaps correctness
+
+func TestLargeHeap1(t *testing.T) {
+	h := NewHeap()
+
+	for i := 0; i < 1e7; i++ {
+		h.Insert(OrderableInt(i % 10))
+	}
+
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 1e6; j++ {
+			extractAndVerify(t, h, OrderableInt(i))
+		}
+	}
+}
+
+func TestLargeHeap2(t *testing.T) {
+	h := NewHeap()
+
+	for i := 0; i < 1e7; i++ {
+		h.Insert(OrderableInt(i))
+	}
+
+	for i := 0; i < 1e7; i++ {
+		extractAndVerify(t, h, OrderableInt(i))
 	}
 }

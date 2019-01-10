@@ -497,6 +497,20 @@ func BenchmarkFiboHeapExtractMin(b *testing.B) {
 	}
 }
 
+func BenchmarkFiboHeapDelete(b *testing.B) {
+	h := NewHeap()
+	m := make(map[int]*FHNode)
+
+	for i := 0; i < b.N; i++ {
+		n := h.Insert(ComparableInt(i))
+		m[i] = n
+	}
+
+	for i := 0; i < b.N; i++ {
+		h.Delete(m[i])
+	}
+}
+
 func BenchmarkFiboHeapFind(b *testing.B) {
 	h := NewHeap()
 

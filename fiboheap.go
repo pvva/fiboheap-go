@@ -21,6 +21,7 @@ func (fhn *FHNode) Value() Comparable {
 
 type Heap struct {
 	root *FHNode
+	size uint64
 }
 
 func NewHeap() *Heap {
@@ -83,6 +84,7 @@ func (heap *Heap) Insert(v Comparable) *FHNode {
 			heap.root = newNode
 		}
 	}
+	heap.size++
 
 	return newNode
 }
@@ -92,10 +94,12 @@ func (heap *Heap) Union(targetHeap *Heap) {
 	case heap.root == nil:
 		*heap = *targetHeap
 	case targetHeap.root != nil:
+		hs := heap.size
 		heap.meld2(heap.root, targetHeap.root)
 		if targetHeap.root.value.LessThen(heap.root.value) {
 			*heap = *targetHeap
 		}
+		heap.size = hs + targetHeap.size
 	}
 	targetHeap.root = nil
 }
@@ -173,6 +177,7 @@ func (heap *Heap) ExtractMin() (Comparable, bool) {
 
 	if newRoot == nil {
 		heap.root = nil
+		heap.size--
 
 		return min, true
 	}
@@ -195,6 +200,7 @@ func (heap *Heap) ExtractMin() (Comparable, bool) {
 		}
 	}
 	heap.root = newRoot
+	heap.size--
 
 	return min, true
 }
@@ -227,6 +233,7 @@ func (heap *Heap) Delete(node *FHNode) {
 	if node.parent == nil {
 		if node == heap.root {
 			heap.ExtractMin()
+
 			return
 		}
 		node.prev.next = node.next
@@ -234,6 +241,7 @@ func (heap *Heap) Delete(node *FHNode) {
 	} else {
 		heap.cut(node)
 	}
+	heap.size--
 
 	child := node.child
 	if child == nil {
@@ -278,4 +286,8 @@ func (heap *Heap) findAt(node *FHNode, value Comparable) *FHNode {
 
 func (heap *Heap) Find(value Comparable) *FHNode {
 	return heap.findAt(heap.root, value)
+}
+
+func (heap *Heap) Size() uint64 {
+	return heap.size
 }

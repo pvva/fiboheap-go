@@ -70,4 +70,9 @@ heap.Delete(node)
 node := heap.Find(comparableValue)
 ```
 
+## Get heap size
+```
+size := heap.Size()
+```
+
 For more examples see tests.

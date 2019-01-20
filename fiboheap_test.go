@@ -75,6 +75,11 @@ func assertNotFound(t *testing.T, heap *Heap, value Comparable) {
 		t.Fatal("Find is incorrect, returned non empty value")
 	}
 }
+func assertSize(t *testing.T, heap *Heap, expected uint64) {
+	if heap.Size() != expected {
+		t.Fatal("Heap size is incorrect, expected", expected, "actual", heap.Size())
+	}
+}
 
 func TestFiboHeapBasics(t *testing.T) {
 	svA := ComparableString("A")
@@ -93,22 +98,33 @@ func TestFiboHeapBasics(t *testing.T) {
 	nodeE := heap.Insert(svE)
 	heap.Insert(svG)
 	heap.Insert(svF)
+	assertSize(t, heap, 7)
 
 	peekAndVerify(t, heap, svA)
+	assertSize(t, heap, 7)
 	extractAndVerify(t, heap, svA)
+	assertSize(t, heap, 6)
 	extractAndVerify(t, heap, svB)
+	assertSize(t, heap, 5)
 
 	heap.Delete(nodeE)
+	assertSize(t, heap, 4)
 
 	extractAndVerify(t, heap, svC)
+	assertSize(t, heap, 3)
 	extractAndVerify(t, heap, svD)
+	assertSize(t, heap, 2)
 
 	peekAndVerify(t, heap, svF)
+	assertSize(t, heap, 2)
 	extractAndVerify(t, heap, svF)
+	assertSize(t, heap, 1)
 
 	extractAndVerify(t, heap, svG)
+	assertSize(t, heap, 0)
 
 	assertHeapIsEmpty(t, heap)
+	assertSize(t, heap, 0)
 }
 
 func TestFiboHeapDelete(t *testing.T) {
@@ -137,11 +153,14 @@ func TestFiboHeapUnion1(t *testing.T) {
 	heap1 := NewHeap()
 	heap1.Insert(svA)
 	heap1.Insert(svB)
+	assertSize(t, heap1, 2)
 
 	heap2 := NewHeap()
 	heap2.Insert(svB)
+	assertSize(t, heap2, 1)
 
 	heap1.Union(heap2)
+	assertSize(t, heap1, 3)
 
 	extractAndVerify(t, heap1, svA)
 	extractAndVerify(t, heap1, svB)
@@ -158,12 +177,15 @@ func TestFiboHeapUnion2(t *testing.T) {
 	heap1 := NewHeap()
 	heap1.Insert(svB)
 	heap1.Insert(svC)
+	assertSize(t, heap1, 2)
 
 	heap2 := NewHeap()
 	heap2.Insert(svA)
 	heap2.Insert(svB)
+	assertSize(t, heap2, 2)
 
 	heap1.Union(heap2)
+	assertSize(t, heap1, 4)
 
 	extractAndVerify(t, heap1, svA)
 	extractAndVerify(t, heap1, svB)
@@ -178,12 +200,15 @@ func TestFiboHeapUnion3(t *testing.T) {
 	svB := ComparableString("B")
 
 	heap1 := NewHeap()
+	assertSize(t, heap1, 0)
 
 	heap2 := NewHeap()
 	heap2.Insert(svA)
 	heap2.Insert(svB)
+	assertSize(t, heap2, 2)
 
 	heap1.Union(heap2)
+	assertSize(t, heap2, 2)
 
 	extractAndVerify(t, heap1, svA)
 	extractAndVerify(t, heap1, svB)
